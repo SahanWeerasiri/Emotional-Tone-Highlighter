@@ -1,9 +1,11 @@
 body {
-    width: 300px;
-    padding: 10px;
-    font-family: sans-serif;
+  width: 320px;
+  padding: 12px;
+  font-family: sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
 }
 
 .tone-input {
-    margin-bottom: 5px;
+  margin-bottom: 8px;
 }
