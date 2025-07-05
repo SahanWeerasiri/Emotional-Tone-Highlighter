@@ -34,32 +34,26 @@ async function highlightText() {
         return;
     }
 
-    const textNodes = Array.from(document.body.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+    const textNodes = Array.from(document.body.querySelectorAll('*:not(script):not(style):not(iframe):not(textarea):not(input):not(head) *'))
+        .filter(node => node.nodeType === Node.TEXT_NODE && node.nodeValue.trim().length > 0);
 
     for (const toneDefinition of toneDefinitions) {
         const { keywords, color } = toneDefinition;
-        const regexes = keywords.map(keyword => new RegExp(`\\b${keyword}\\b`, 'gi'));
+        const regex = new RegExp(`\\b(${keywords.join('|')})\\b`, 'gi');
 
         for (const textNode of textNodes) {
             if (!textNode.parentNode) continue;
 
-            let text = textNode.nodeValue;
-            let matchFound = false;
-
-            for (const regex of regexes) {
-                if (!text) continue;
-                if (regex.test(text)) {
-                    matchFound = true;
-                    text = text.replace(regex, (match) => `<span style="background-color: ${color};">${match}</span>`);
+            const originalText = textNode.nodeValue;
+            if (regex.test(originalText)) {
+                const replacementText = originalText.replace(regex, (match) => `<span style="background-color: ${color};">${match}</span>`);
+                if (replacementText !== originalText) {
+                    const tempDiv = document.createElement('span');
+                    tempDiv.innerHTML = replacementText;
+                    const fragment = document.createDocumentFragment();
+                    Array.from(tempDiv.childNodes).forEach(child => fragment.appendChild(child));
+                    textNode.parentNode.replaceChild(fragment, textNode);
                 }
-            }
-            if (matchFound) {
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = text;
-                Array.from(tempDiv.childNodes).forEach(child => {
-                    textNode.parentNode.insertBefore(child, textNode);
-                });
-                textNode.remove();
             }
         }
     }
