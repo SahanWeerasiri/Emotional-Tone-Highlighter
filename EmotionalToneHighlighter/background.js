@@ -15,7 +15,7 @@ async function injectContentScript(tabId) {
       files: ['content.js'],
     });
   } catch (error) {
-    console.error('Error injecting content script:', error);
+    console.error('Error injecting content script for tab', tabId, ':', error);
   }
 }
 
@@ -24,11 +24,13 @@ async function injectContentScript(tabId) {
  * @description Initializes the extension, including setting up listeners.
  */
 function initialize() {
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url && /^https?:\/\//.test(tab.url)) {
-      injectContentScript(tabId);
+  const urlFilter = { url: [{ urlMatches: '^https?://.*' }] };
+
+  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url) {
+      await injectContentScript(tabId);
     }
-  });
+  }, urlFilter);
 }
 
 initialize();
