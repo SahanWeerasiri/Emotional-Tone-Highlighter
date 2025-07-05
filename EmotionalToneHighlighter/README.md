@@ -12,7 +12,7 @@ A browser extension that highlights text on web pages based on user-defined emot
 ## Installation
 
 1.  Clone this repository.
-2.  Open your browser's extension management page (e.g., chrome://extensions in Chrome).
+2.  Open your browser's extension management page (e.g., `chrome://extensions` in Chrome).
 3.  Enable "Developer mode".
 4.  Click "Load unpacked" and select the project directory.
 
@@ -29,4 +29,4 @@ A browser extension that highlights text on web pages based on user-defined emot
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
