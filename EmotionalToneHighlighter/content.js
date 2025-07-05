@@ -16,12 +16,11 @@
  * @returns {Promise<ToneDefinition[]>} - A promise that resolves with an array of tone definitions.
  */
 async function getToneDefinitions() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get(['toneDefinitions'], (result) => {
-      const toneDefinitions = result.toneDefinitions || [];
-      resolve(toneDefinitions);
+    return new Promise((resolve) => {
+        chrome.storage.local.get(['toneDefinitions'], (result) => {
+            resolve(result.toneDefinitions || []);
+        });
     });
-  });
 }
 
 /**
@@ -30,22 +29,40 @@ async function getToneDefinitions() {
  */
 async function highlightText() {
     const toneDefinitions = await getToneDefinitions();
+
     if (!toneDefinitions || toneDefinitions.length === 0) {
-        return; // No tones defined, do nothing
+        return;
     }
 
-    // Iterate through tone definitions and highlight text.
-    toneDefinitions.forEach(toneDefinition => {
-        const { tone, keywords, color } = toneDefinition;
-        keywords.forEach(keyword => {
-            const regex = new RegExp(`\\b${keyword}\\b`, 'gi'); // Use word boundaries to match whole words
-            const spans = document.body.innerHTML.matchAll(regex);
-            for (const span of spans){
-                const replacement = `<span style="background-color: ${color};">${span[0]}</span>`;
-                document.body.innerHTML = document.body.innerHTML.replace(regex, replacement);
+    const textNodes = Array.from(document.body.childNodes).filter(node => node.nodeType === Node.TEXT_NODE);
+
+    for (const toneDefinition of toneDefinitions) {
+        const { keywords, color } = toneDefinition;
+        const regexes = keywords.map(keyword => new RegExp(`\\b${keyword}\\b`, 'gi'));
+
+        for (const textNode of textNodes) {
+            if (!textNode.parentNode) continue;
+
+            let text = textNode.nodeValue;
+            let matchFound = false;
+
+            for (const regex of regexes) {
+                if (!text) continue;
+                if (regex.test(text)) {
+                    matchFound = true;
+                    text = text.replace(regex, (match) => `<span style="background-color: ${color};">${match}</span>`);
+                }
             }
-        });
-    });
+            if (matchFound) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text;
+                Array.from(tempDiv.childNodes).forEach(child => {
+                    textNode.parentNode.insertBefore(child, textNode);
+                });
+                textNode.remove();
+            }
+        }
+    }
 }
 
 /**
