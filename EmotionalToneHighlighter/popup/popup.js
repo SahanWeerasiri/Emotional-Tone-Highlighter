@@ -83,16 +83,16 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get('tones', (result) => {
     const savedTones = result.tones || [];
     savedTones.forEach(toneData => {
-      addToneInput(); // Add input fields
+      addToneInput();
       const lastInputGroup = document.querySelector('.tone-input-group:last-child');
       if (lastInputGroup) {
         const toneInput = lastInputGroup.querySelector('.tone-input');
         const colorInput = lastInputGroup.querySelector('.color-input');
         if (toneInput) {
-            toneInput.value = toneData.tone;
+          toneInput.value = toneData.tone;
         }
         if (colorInput) {
-            colorInput.value = toneData.color;
+          colorInput.value = toneData.color;
         }
       }
     });
