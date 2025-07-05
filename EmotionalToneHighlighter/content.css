@@ -1,0 +1,79 @@
+/* Emotional Tone Highlighter CSS */
+
+/* Base styles for highlighted text */
+.emotional-highlight {
+    padding: 0 2px;
+    border-radius: 3px;
+    display: inline;
+    position: relative;
+}
+
+/* Positive emotions */
+.emotional-highlight.happy {
+    background-color: rgba(255, 253, 150, 0.5);
+    border-bottom: 2px solid #FFD700;
+}
+
+.emotional-highlight.excited {
+    background-color: rgba(255, 191, 0, 0.3);
+    border-bottom: 2px solid #FFA500;
+}
+
+.emotional-highlight.grateful {
+    background-color: rgba(152, 251, 152, 0.3);
+    border-bottom: 2px solid #98FB98;
+}
+
+/* Negative emotions */
+.emotional-highlight.angry {
+    background-color: rgba(255, 99, 71, 0.3);
+    border-bottom: 2px solid #FF6347;
+}
+
+.emotional-highlight.sad {
+    background-color: rgba(135, 206, 235, 0.3);
+    border-bottom: 2px solid #87CEEB;
+}
+
+.emotional-highlight.anxious {
+    background-color: rgba(216, 191, 216, 0.3);
+    border-bottom: 2px solid #DDA0DD;
+}
+
+/* Neutral emotions */
+.emotional-highlight.neutral {
+    background-color: rgba(211, 211, 211, 0.3);
+    border-bottom: 2px solid #D3D3D3;
+}
+
+/* Tooltip styles */
+.emotional-tooltip {
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 1000;
+}
+
+.emotional-highlight:hover .emotional-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Intensity modifiers */
+.emotional-highlight.intensity-low {
+    opacity: 0.7;
+}
+
+.emotional-highlight.intensity-high {
+    font-weight: bold;
+}
