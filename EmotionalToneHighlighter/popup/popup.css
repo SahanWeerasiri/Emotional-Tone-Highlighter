@@ -7,6 +7,92 @@ body {
   line-height: 1.6;
 }
 
-.tone-input {
+.tone-input-group {
   margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+}
+
+.tone-input,
+.keywords-input {
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.color-input {
+  width: 60px;
+  height: 30px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.delete-button {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.delete-button:hover {
+  background-color: #cc0000;
+}
+
+#add-tone-button,
+#save-button,
+#highlight-button {
+  width: 100%;
+  margin: 6px 0;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#add-tone-button:hover,
+#save-button:hover,
+#highlight-button:hover {
+  background-color: #45a049;
+}
+
+#highlight-button {
+  background-color: #2196F3;
+}
+
+#highlight-button:hover {
+  background-color: #1976D2;
+}
+
+#status-message {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.status-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }

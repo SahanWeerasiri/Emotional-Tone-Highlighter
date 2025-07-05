@@ -3,34 +3,68 @@
  * @description Background script for the Emotional Tone Highlighter extension. Handles extension events and content script injection.
  */
 
-/**
- * @function injectContentScript
- * @description Injects the content script into a specified tab.
- * @param {number} tabId - The ID of the tab to inject the script into.
- */
-async function injectContentScript(tabId) {
-  try {
-    await chrome.scripting.executeScript({
-      target: { tabId: tabId },
-      files: ['content.js'],
-    });
-  } catch (error) {
-    console.error('Error injecting content script for tab', tabId, ':', error);
-  }
-}
+console.log('Background script loaded');
 
 /**
  * @function initialize
- * @description Initializes the extension, including setting up listeners.
+ * @description Initializes the extension background script.
  */
 function initialize() {
-  const urlFilter = { url: [{ urlMatches: '^https?://.*' }] };
+  console.log('Initializing extension background script');
 
-  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete' && tab.url) {
-      await injectContentScript(tabId);
+  // Listen for tab updates to re-highlight when pages load
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url && !tab.url.startsWith('chrome://')) {
+      console.log('Page loaded:', tab.url);
+
+      // Inject and run highlighting after a short delay
+      setTimeout(() => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabId },
+          function: () => {
+            if (window.highlightText) {
+              window.highlightText();
+            }
+          }
+        }).catch(err => {
+          console.log('Could not highlight page:', err.message);
+        });
+      }, 1000);
     }
-  }, urlFilter);
+  });
+
+  // Create context menu for quick highlighting
+  chrome.contextMenus.create({
+    id: 'highlight-emotional-tone',
+    title: 'Highlight Emotional Tones',
+    contexts: ['page', 'selection']
+  });
+
+  // Handle context menu clicks
+  chrome.contextMenus.onClicked.addListener((info, tab) => {
+    if (info.menuItemId === 'highlight-emotional-tone') {
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        function: () => {
+          // Remove existing highlights first
+          document.querySelectorAll('.emotional-tone-highlight').forEach(el => {
+            const parent = el.parentNode;
+            parent.replaceChild(document.createTextNode(el.textContent), el);
+            parent.normalize();
+          });
+
+          // Re-highlight
+          if (window.highlightText) {
+            window.highlightText();
+          }
+        }
+      }).catch(err => {
+        console.log('Could not highlight page:', err.message);
+      });
+    }
+  });
+
+  console.log('Background script initialization complete');
 }
 
 initialize();

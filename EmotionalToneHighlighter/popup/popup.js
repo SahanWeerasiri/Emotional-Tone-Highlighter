@@ -19,8 +19,13 @@ function addToneInput() {
 
   const toneInput = document.createElement('input');
   toneInput.type = 'text';
-  toneInput.placeholder = 'Tone';
+  toneInput.placeholder = 'Tone (e.g., happy)';
   toneInput.classList.add('tone-input');
+
+  const keywordsInput = document.createElement('input');
+  keywordsInput.type = 'text';
+  keywordsInput.placeholder = 'Keywords (comma-separated)';
+  keywordsInput.classList.add('keywords-input');
 
   const colorInput = document.createElement('input');
   colorInput.type = 'color';
@@ -35,6 +40,7 @@ function addToneInput() {
   });
 
   inputGroup.appendChild(toneInput);
+  inputGroup.appendChild(keywordsInput);
   inputGroup.appendChild(colorInput);
   inputGroup.appendChild(deleteButton);
   toneContainer.appendChild(inputGroup);
@@ -46,26 +52,81 @@ function addToneInput() {
  */
 function saveTones() {
   const toneGroups = document.querySelectorAll('.tone-input-group');
-  const tones = [];
+  const toneDefinitions = [];
 
   toneGroups.forEach(group => {
     const toneInput = group.querySelector('.tone-input');
+    const keywordsInput = group.querySelector('.keywords-input');
     const colorInput = group.querySelector('.color-input');
-    if (toneInput && colorInput && toneInput.value.trim() !== '') {
-      tones.push({
+
+    if (toneInput && keywordsInput && colorInput &&
+      toneInput.value.trim() !== '' && keywordsInput.value.trim() !== '') {
+      const keywords = keywordsInput.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      toneDefinitions.push({
         tone: toneInput.value.trim(),
+        keywords: keywords,
         color: colorInput.value
       });
     }
   });
 
-  chrome.storage.local.set({ tones: tones }, () => {
+  chrome.storage.local.set({ toneDefinitions: toneDefinitions }, () => {
     if (chrome.runtime.lastError) {
       console.error('Error saving tones:', chrome.runtime.lastError);
+      showStatus('Error saving tones!', 'error');
     } else {
-      // Optionally provide feedback to the user (e.g., a success message)
+      console.log('Tones saved successfully:', toneDefinitions);
+      showStatus('Tones saved successfully!', 'success');
     }
   });
+}
+
+/**
+ * @function showStatus
+ * @description Shows a status message to the user.
+ */
+function showStatus(message, type = 'info') {
+  const statusDiv = document.getElementById('status-message');
+  if (statusDiv) {
+    statusDiv.textContent = message;
+    statusDiv.className = `status-${type}`;
+    setTimeout(() => {
+      statusDiv.textContent = '';
+      statusDiv.className = '';
+    }, 3000);
+  }
+}
+
+/**
+ * @function highlightCurrentPage
+ * @description Triggers highlighting on the current active tab.
+ */
+async function highlightCurrentPage() {
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      function: () => {
+        // Remove existing highlights
+        document.querySelectorAll('.emotional-tone-highlight').forEach(el => {
+          const parent = el.parentNode;
+          parent.replaceChild(document.createTextNode(el.textContent), el);
+          parent.normalize();
+        });
+
+        // Trigger re-highlighting
+        if (window.highlightText) {
+          window.highlightText();
+        }
+      }
+    });
+
+    showStatus('Page highlighted successfully!', 'success');
+  } catch (error) {
+    console.error('Error highlighting page:', error);
+    showStatus('Error highlighting page!', 'error');
+  }
 }
 
 // Event listeners
@@ -80,21 +141,47 @@ document.addEventListener('DOMContentLoaded', () => {
     saveButton.addEventListener('click', saveTones);
   }
 
-  chrome.storage.local.get('tones', (result) => {
-    const savedTones = result.tones || [];
-    savedTones.forEach(toneData => {
+  const highlightButton = document.getElementById('highlight-button');
+  if (highlightButton) {
+    highlightButton.addEventListener('click', highlightCurrentPage);
+  }
+
+  // Load existing tone definitions
+  chrome.storage.local.get('toneDefinitions', (result) => {
+    const savedToneDefinitions = result.toneDefinitions || [];
+    savedToneDefinitions.forEach(toneData => {
       addToneInput();
       const lastInputGroup = document.querySelector('.tone-input-group:last-child');
       if (lastInputGroup) {
         const toneInput = lastInputGroup.querySelector('.tone-input');
+        const keywordsInput = lastInputGroup.querySelector('.keywords-input');
         const colorInput = lastInputGroup.querySelector('.color-input');
+
         if (toneInput) {
           toneInput.value = toneData.tone;
+        }
+        if (keywordsInput) {
+          keywordsInput.value = toneData.keywords.join(', ');
         }
         if (colorInput) {
           colorInput.value = toneData.color;
         }
       }
     });
+
+    // Add a default tone if none exist
+    if (savedToneDefinitions.length === 0) {
+      addToneInput();
+      const defaultGroup = document.querySelector('.tone-input-group:last-child');
+      if (defaultGroup) {
+        const toneInput = defaultGroup.querySelector('.tone-input');
+        const keywordsInput = defaultGroup.querySelector('.keywords-input');
+        const colorInput = defaultGroup.querySelector('.color-input');
+
+        if (toneInput) toneInput.value = 'happy';
+        if (keywordsInput) keywordsInput.value = 'happy, joy, excited, great, awesome, wonderful';
+        if (colorInput) colorInput.value = '#ffff96';
+      }
+    }
   });
 });
