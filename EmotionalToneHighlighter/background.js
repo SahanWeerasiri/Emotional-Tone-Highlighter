@@ -24,12 +24,11 @@ async function injectContentScript(tabId) {
  * @description Initializes the extension, including setting up listeners.
  */
 function initialize() {
-    // Listen for tab updates to inject the content script.
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-        if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
-            injectContentScript(tabId);
-        }
-    });
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete' && tab.url && /^https?:\/\//.test(tab.url)) {
+      injectContentScript(tabId);
+    }
+  });
 }
 
 initialize();
